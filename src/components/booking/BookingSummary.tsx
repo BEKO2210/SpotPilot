@@ -108,16 +108,9 @@ export const BookingSummary = ({ providerId, onNext }: { providerId: string; onN
         bookingCount: increment(1)
       });
 
-      // 4. TODO: Hier E-Mail-Versand implementieren
-      // await sendConfirmationEmail({
-      //   to: customerInfo.email,
-      //   reference: bookingRef,
-      //   service: selectedService,
-      //   date: selectedDate,
-      //   time: selectedTime
-      // });
-
-      console.log('✅ Buchung erfolgreich:', {
+      // 4. E-Mail wird automatisch durch Firebase Function gesendet
+      // Die Function 'sendBookingConfirmation' wird bei onCreate getriggert
+      console.log('✅ Buchung erfolgreich - E-Mail wird via Firebase Function gesendet:', {
         reference: bookingRef,
         email: customerInfo.email,
         service: selectedService.name

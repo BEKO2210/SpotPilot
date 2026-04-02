@@ -19,10 +19,10 @@
 | **Öffentliche Buchungsseite** | ✅ Live | Conversion-optimierter Booking-Flow |
 | **Kunden-CRM** | ✅ Live | Profile, Buchungshistorie, Tags |
 | **Service-Management** | ✅ Live | Dauer, Puffer, Add-ons, Kategorien |
-| **Mitarbeiter-System** | 🚧 TODO | Staff-Verwaltung + individuelle Verfügbarkeiten |
-| **Smart Slot Engine** | 🚧 TODO | Automatische Berechnung freier Termine |
+| **Mitarbeiter-System** | ✅ Live | Staff-Verwaltung + individuelle Verfügbarkeiten |
+| **Smart Slot Engine** | ✅ Live | Automatische Berechnung freier Termine |
 | **Zahlungsintegration** | 🚧 TODO | Stripe/PayPal Anbindung |
-| **Erinnerungen** | 🚧 TODO | SMS/E-Mail Benachrichtigungen |
+| **E-Mail-Benachrichtigungen** | ✅ Live | Automatische Bestätigungen via Firebase Functions |
 
 ### Tech-Stack
 ```

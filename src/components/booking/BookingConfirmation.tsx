@@ -36,14 +36,8 @@ export const BookingConfirmation = () => {
 
   useEffect(() => {
     if (!bookingReference) {
-      // In echter App: Hier würde die E-Mail gesendet werden
-      console.log('Buchungsbestätigung:', {
-        reference,
-        email: customerInfo.email,
-        service: selectedService?.name,
-        date: selectedDate,
-        time: selectedTime
-      });
+      // Fallback: Sollte nicht passieren da Referenz in BookingSummary gesetzt wird
+      console.warn('Keine Buchungsreferenz gefunden');
     }
     
     // Email-Notice nach 5 Sekunden ausblenden
