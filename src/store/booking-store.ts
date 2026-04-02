@@ -1,38 +1,55 @@
 import { create } from 'zustand';
-import { Booking, Service, Customer, StaffMember } from '../types';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import { Service } from '../types';
+
+interface CustomerInfo {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone?: string;
+  notes?: string;
+}
 
 interface BookingState {
   selectedService: Service | null;
-  selectedStaff: StaffMember | null;
   selectedDate: Date | null;
   selectedTime: string | null;
-  customerInfo: Partial<Customer>;
-  
+  customerInfo: Partial<CustomerInfo>;
+  bookingReference: string | null;
   setSelectedService: (service: Service | null) => void;
-  setSelectedStaff: (staff: StaffMember | null) => void;
   setSelectedDate: (date: Date | null) => void;
   setSelectedTime: (time: string | null) => void;
-  setCustomerInfo: (info: Partial<Customer>) => void;
+  setCustomerInfo: (info: Partial<CustomerInfo>) => void;
+  setBookingReference: (ref: string | null) => void;
   reset: () => void;
 }
 
-export const useBookingStore = create<BookingState>((set) => ({
-  selectedService: null,
-  selectedStaff: null,
-  selectedDate: null,
-  selectedTime: null,
-  customerInfo: {},
-  
-  setSelectedService: (service) => set({ selectedService: service }),
-  setSelectedStaff: (staff) => set({ selectedStaff: staff }),
-  setSelectedDate: (date) => set({ selectedDate: date }),
-  setSelectedTime: (time) => set({ selectedTime: time }),
-  setCustomerInfo: (info) => set((state) => ({ customerInfo: { ...state.customerInfo, ...info } })),
-  reset: () => set({
-    selectedService: null,
-    selectedStaff: null,
-    selectedDate: null,
-    selectedTime: null,
-    customerInfo: {}
-  })
-}));
+export const useBookingStore = create<BookingState>()(
+  persist(
+    (set) => ({
+      selectedService: null,
+      selectedDate: null,
+      selectedTime: null,
+      customerInfo: {},
+      bookingReference: null,
+      setSelectedService: (service) => set({ selectedService: service }),
+      setSelectedDate: (date) => set({ selectedDate: date }),
+      setSelectedTime: (time) => set({ selectedTime: time }),
+      setCustomerInfo: (info) => set((state) => ({ 
+        customerInfo: { ...state.customerInfo, ...info } 
+      })),
+      setBookingReference: (ref) => set({ bookingReference: ref }),
+      reset: () => set({ 
+        selectedService: null, 
+        selectedDate: null, 
+        selectedTime: null, 
+        customerInfo: {},
+        bookingReference: null 
+      }),
+    }),
+    {
+      name: 'booking-storage',
+      storage: createJSONStorage(() => sessionStorage),
+    }
+  )
+);

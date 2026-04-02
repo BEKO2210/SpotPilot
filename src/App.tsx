@@ -28,7 +28,8 @@ import {
   CheckCircle,
   Info,
   AlertTriangle,
-  XCircle
+  XCircle,
+  Briefcase
 } from 'lucide-react';
 import { Button, Card, Badge, Modal } from './components/ui/Primitives';
 import { cn, formatTimeAgo } from './lib/utils';
@@ -38,6 +39,7 @@ import { PublicBookingPage } from './pages/PublicBookingPage';
 import { OnboardingPage } from './pages/OnboardingPage';
 import { CalendarPage } from './pages/CalendarPage';
 import { Settings } from './components/dashboard/Settings';
+import { StaffManager } from './components/staff/StaffManager';
 
 const queryClient = new QueryClient();
 
@@ -70,6 +72,7 @@ const DashboardLayout = ({ children, provider }: { children: React.ReactNode; pr
   const navItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
     { icon: CalendarIcon, label: 'Kalender', path: '/calendar' },
+    { icon: Briefcase, label: 'Team', path: '/staff' },
     { icon: Users, label: 'Kunden', path: '/customers' },
     { icon: Plus, label: 'Services', path: '/services' },
     { icon: SettingsIcon, label: 'Einstellungen', path: '/settings' },
@@ -536,6 +539,14 @@ export default function App() {
             !provider?.onboarded ? <Navigate to="/onboarding" /> :
             <DashboardLayout provider={provider}>
               <ServiceManager providerId={user.uid} />
+            </DashboardLayout>
+          } />
+
+          <Route path="/staff" element={
+            !user ? <Navigate to="/login" /> : 
+            !provider?.onboarded ? <Navigate to="/onboarding" /> :
+            <DashboardLayout provider={provider}>
+              <StaffManager providerId={user.uid} />
             </DashboardLayout>
           } />
 
