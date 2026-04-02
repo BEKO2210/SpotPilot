@@ -1,0 +1,173 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    // Collection: providers
+    // - name: string (required)
+    // - email: string (required, email)
+    // - businessName: string (required)
+    // - bookingSlug: string (required)
+    //
+    // Collection: services
+    // - providerId: string (required)
+    // - name: string (required)
+    // - duration: number (required)
+    // - price: number (required)
+    // - isActive: bool (required)
+    //
+    // Collection: bookings
+    // - providerId: string (required)
+    // - serviceId: string (required)
+    // - customerId: string (required)
+    // - date: string (required, YYYY-MM-DD)
+    // - startTime: string (required, HH:mm)
+    // - status: string (required, enum)
+    // - confirmationToken: string (required)
+    //
+    // Collection: notifications
+    // - providerId: string (required)
+    // - title: string (required)
+    // - message: string (required)
+    // - type: string (required, enum)
+    // - isRead: bool (required)
+    // - createdAt: string (required, ISO 8601)
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isDocOwner() {
+      return isAuthenticated() && request.auth.uid == resource.data.providerId;
+    }
+
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    function isValidEmail(email) {
+      return email is string && email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    function isValidDateString(dateStr) {
+      return dateStr is string && dateStr.matches("^\\d{4}-\\d{2}-\\d{2}$");
+    }
+
+    function isValidTimeString(timeStr) {
+      return timeStr is string && timeStr.matches("^\\d{2}:\\d{2}$");
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && (
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+        (request.auth.token.email == "belkis.aslani@gmail.com" && request.auth.token.email_verified == true)
+      );
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+    function isValidProvider(data) {
+      return data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
+             data.email is string && isValidEmail(data.email) &&
+             data.businessName is string && data.businessName.size() >= 0 && data.businessName.size() < 100 &&
+             data.bookingSlug is string && data.bookingSlug.size() > 0 && data.bookingSlug.size() < 50;
+    }
+
+    function isValidService(data) {
+      return data.providerId is string &&
+             data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
+             data.duration is number && data.duration > 0 &&
+             data.price is number && data.price >= 0 &&
+             data.isActive is bool;
+    }
+
+    function isValidBooking(data) {
+      return data.providerId is string &&
+             data.serviceId is string &&
+             data.customerId is string &&
+             isValidDateString(data.date) &&
+             isValidTimeString(data.startTime) &&
+             data.status in ['confirmed', 'cancelled', 'no-show', 'completed', 'rescheduled'] &&
+             data.confirmationToken is string && data.confirmationToken.size() > 0 && data.confirmationToken.size() < 100;
+    }
+
+    function isValidCustomer(data) {
+      return data.providerId is string &&
+             data.firstName is string && data.firstName.size() > 0 && data.firstName.size() < 50 &&
+             data.lastName is string && data.lastName.size() > 0 && data.lastName.size() < 50 &&
+             data.email is string && isValidEmail(data.email) &&
+             (!('phone' in data) || (data.phone is string && data.phone.size() < 30));
+    }
+
+    function isValidNotification(data) {
+      return data.providerId is string &&
+             data.title is string && data.title.size() > 0 && data.title.size() < 200 &&
+             data.message is string && data.message.size() > 0 && data.message.size() < 1000 &&
+             data.type in ['info', 'success', 'warning', 'error'] &&
+             data.isRead is bool &&
+             data.createdAt is string;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+    
+    // Default deny
+    match /{path=**} {
+      allow read, write: if false;
+    }
+
+    match /providers/{providerId} {
+      allow read: if true; // Publicly readable for booking page
+      allow create: if isOwner(providerId) && isValidProvider(request.resource.data);
+      allow update: if isOwner(providerId) && isValidProvider(request.resource.data);
+    }
+
+    match /services/{serviceId} {
+      allow read: if true; // Publicly readable for booking page
+      allow create: if isAuthenticated() && request.resource.data.providerId == request.auth.uid && isValidService(request.resource.data);
+      allow update: if isDocOwner() && isValidService(request.resource.data);
+      allow delete: if isDocOwner();
+    }
+
+    match /bookings/{bookingId} {
+      allow read: if isAuthenticated() && (request.auth.uid == resource.data.providerId || request.auth.uid == resource.data.customerId);
+      allow create: if isValidBooking(request.resource.data); // Anyone can create a booking (public)
+      allow update: if (isAuthenticated() && (request.auth.uid == resource.data.providerId || request.auth.uid == resource.data.customerId)) ||
+                      (request.resource.data.confirmationToken == resource.data.confirmationToken);
+    }
+
+    match /customers/{customerId} {
+      allow read: if isAuthenticated() && (request.auth.uid == resource.data.providerId || request.auth.uid == customerId);
+      allow create: if isValidCustomer(request.resource.data); // Anyone can create a customer profile during booking
+      allow update: if isAuthenticated() && (request.auth.uid == resource.data.providerId || request.auth.uid == customerId);
+    }
+
+    match /availability/{availabilityId} {
+      allow read: if true;
+      allow write: if isAuthenticated() && request.resource.data.providerId == request.auth.uid;
+    }
+
+    match /blockers/{blockerId} {
+      allow read: if true;
+      allow write: if isAuthenticated() && request.resource.data.providerId == request.auth.uid;
+    }
+
+    match /notifications/{notificationId} {
+      allow read: if isAuthenticated() && request.auth.uid == resource.data.providerId;
+      allow create: if isAuthenticated() && request.resource.data.providerId == request.auth.uid && isValidNotification(request.resource.data);
+      allow update: if isAuthenticated() && request.auth.uid == resource.data.providerId && isValidNotification(request.resource.data);
+      allow delete: if isAuthenticated() && request.auth.uid == resource.data.providerId;
+    }
+  }
+}

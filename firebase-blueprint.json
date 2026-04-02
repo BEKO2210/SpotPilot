@@ -1,0 +1,132 @@
+{
+  "entities": {
+    "Provider": {
+      "title": "Provider",
+      "description": "A service provider business profile",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "businessName": { "type": "string" },
+        "businessType": { "type": "string" },
+        "bookingSlug": { "type": "string" },
+        "timezone": { "type": "string" },
+        "currency": { "type": "string" },
+        "settings": { "type": "object" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "onboarded": { "type": "boolean" },
+        "subscriptionStatus": { "type": "string", "enum": ["free", "active", "past_due"] },
+        "bookingCount": { "type": "integer" },
+        "maxFreeBookings": { "type": "integer" }
+      },
+      "required": ["name", "email", "businessName", "bookingSlug"]
+    },
+    "Service": {
+      "title": "Service",
+      "description": "A service offered by a provider",
+      "type": "object",
+      "properties": {
+        "providerId": { "type": "string" },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "duration": { "type": "integer" },
+        "price": { "type": "number" },
+        "priceType": { "type": "string" },
+        "capacity": { "type": "integer" },
+        "isActive": { "type": "boolean" },
+        "sortOrder": { "type": "integer" }
+      },
+      "required": ["providerId", "name", "duration", "price"]
+    },
+    "Booking": {
+      "title": "Booking",
+      "description": "An appointment booking",
+      "type": "object",
+      "properties": {
+        "providerId": { "type": "string" },
+        "serviceId": { "type": "string" },
+        "customerId": { "type": "string" },
+        "date": { "type": "string" },
+        "startTime": { "type": "string" },
+        "endTime": { "type": "string" },
+        "status": { "type": "string" },
+        "totalPrice": { "type": "number" },
+        "confirmationToken": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["providerId", "serviceId", "customerId", "date", "startTime", "status"]
+    },
+    "Customer": {
+      "title": "Customer",
+      "description": "A customer profile",
+      "type": "object",
+      "properties": {
+        "providerId": { "type": "string" },
+        "firstName": { "type": "string" },
+        "lastName": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "phone": { "type": "string" },
+        "totalSpent": { "type": "number" },
+        "noShowCount": { "type": "integer" }
+      },
+      "required": ["providerId", "firstName", "lastName", "email"]
+    },
+    "Availability": {
+      "title": "Availability",
+      "description": "Provider availability rules",
+      "type": "object",
+      "properties": {
+        "providerId": { "type": "string" },
+        "dayOfWeek": { "type": "integer" },
+        "startTime": { "type": "string" },
+        "endTime": { "type": "string" },
+        "isActive": { "type": "boolean" }
+      },
+      "required": ["providerId", "dayOfWeek", "startTime", "endTime", "isActive"]
+    },
+    "Notification": {
+      "title": "Notification",
+      "description": "A notification for a provider",
+      "type": "object",
+      "properties": {
+        "providerId": { "type": "string" },
+        "title": { "type": "string" },
+        "message": { "type": "string" },
+        "type": { "type": "string", "enum": ["info", "success", "warning", "error"] },
+        "isRead": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["providerId", "title", "message", "isRead", "createdAt"]
+    }
+  },
+  "firestore": {
+    "providers/{providerId}": {
+      "schema": "Provider",
+      "description": "Provider profile documents"
+    },
+    "services/{serviceId}": {
+      "schema": "Service",
+      "description": "Service definitions"
+    },
+    "bookings/{bookingId}": {
+      "schema": "Booking",
+      "description": "Appointment bookings"
+    },
+    "customers/{customerId}": {
+      "schema": "Customer",
+      "description": "Customer profiles"
+    },
+    "availability/{availabilityId}": {
+      "schema": "Availability",
+      "description": "Provider availability rules"
+    },
+    "blockers/{blockerId}": {
+      "schema": "Blocker",
+      "description": "Calendar blockers"
+    },
+    "notifications/{notificationId}": {
+      "schema": "Notification",
+      "description": "Provider notifications"
+    }
+  }
+}
