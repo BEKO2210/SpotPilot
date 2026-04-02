@@ -17,6 +17,7 @@ export const BookingSummary = ({ providerId, onNext }: { providerId: string; onN
     selectedService, 
     selectedDate, 
     selectedTime, 
+    selectedStaffId,
     customerInfo,
     setBookingReference,
     reset 
@@ -87,6 +88,7 @@ export const BookingSummary = ({ providerId, onNext }: { providerId: string; onN
       await createBooking.mutateAsync({
         providerId,
         serviceId: selectedService.id,
+        staffId: selectedStaffId, // NEU: Mitarbeiter zuweisen
         customerId,
         date: format(selectedDate, 'yyyy-MM-dd'),
         startTime: selectedTime,
@@ -97,7 +99,7 @@ export const BookingSummary = ({ providerId, onNext }: { providerId: string; onN
         depositPaid: 0,
         notes: customerInfo.notes,
         confirmationToken: generateToken(),
-        bookingReference: bookingRef, // NEU: Speichere Referenz auch in DB
+        bookingReference: bookingRef,
         createdAt: new Date(),
       });
 

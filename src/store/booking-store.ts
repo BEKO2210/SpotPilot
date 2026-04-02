@@ -14,11 +14,13 @@ interface BookingState {
   selectedService: Service | null;
   selectedDate: Date | null;
   selectedTime: string | null;
+  selectedStaffId: string | null;
   customerInfo: Partial<CustomerInfo>;
   bookingReference: string | null;
   setSelectedService: (service: Service | null) => void;
   setSelectedDate: (date: Date | null) => void;
   setSelectedTime: (time: string | null) => void;
+  setSelectedStaffId: (staffId: string | null) => void;
   setCustomerInfo: (info: Partial<CustomerInfo>) => void;
   setBookingReference: (ref: string | null) => void;
   reset: () => void;
@@ -30,11 +32,13 @@ export const useBookingStore = create<BookingState>()(
       selectedService: null,
       selectedDate: null,
       selectedTime: null,
+      selectedStaffId: null,
       customerInfo: {},
       bookingReference: null,
       setSelectedService: (service) => set({ selectedService: service }),
       setSelectedDate: (date) => set({ selectedDate: date }),
       setSelectedTime: (time) => set({ selectedTime: time }),
+      setSelectedStaffId: (staffId) => set({ selectedStaffId: staffId }),
       setCustomerInfo: (info) => set((state) => ({ 
         customerInfo: { ...state.customerInfo, ...info } 
       })),
@@ -43,6 +47,7 @@ export const useBookingStore = create<BookingState>()(
         selectedService: null, 
         selectedDate: null, 
         selectedTime: null, 
+        selectedStaffId: null,
         customerInfo: {},
         bookingReference: null 
       }),
