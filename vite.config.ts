@@ -6,9 +6,11 @@ import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig(({mode}) => {
   const env = loadEnv(mode, '.', '');
+  const base = env.VITE_BASE || '/';
   return {
+    base,
     plugins: [
-      react(), 
+      react(),
       tailwindcss(),
       VitePWA({
         registerType: 'autoUpdate',
@@ -18,6 +20,8 @@ export default defineConfig(({mode}) => {
           short_name: 'SlotPilot',
           description: 'Professional Booking & Scheduling System',
           theme_color: '#2563eb',
+          start_url: base,
+          scope: base,
           icons: [
             {
               src: 'pwa-192x192.png',
